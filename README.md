@@ -1,0 +1,1 @@
+nailpro-inventory-purchase-platform

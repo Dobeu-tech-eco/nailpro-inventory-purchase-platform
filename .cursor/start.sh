@@ -7,6 +7,12 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
+# Serialize concurrent invocations (e.g. the `start` phase and the dev-server
+# terminal both calling this script) so we never race to launch dockerd or the
+# Supabase stack twice.
+exec 9>/tmp/nailpro-start.lock
+flock 9
+
 # --- 1. Docker engine (daemon is not managed by systemd in this VM) ---------
 if ! sudo docker info >/dev/null 2>&1; then
   sudo bash -c 'nohup dockerd >/var/log/dockerd.log 2>&1 &'
